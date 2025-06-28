@@ -8,7 +8,7 @@ namespace AES_imp.Models;
 
 /// <summary>
 /// AES done with use of: 
-/// https://learn.microsoft.com/pl-pl/dotnet/api/system.security.cryptography.aes?view=net-8.0 
+/// https://learn.microsoft.com/en-gb/dotnet/api/system.security.cryptography.aes?view=net-8.0 
 /// simplified but sufficient for the use case
 /// </summary>
 public class AESHelper
@@ -45,30 +45,49 @@ public class AESHelper
     /// <returns>Ciphered text.</returns>
     public string Encrypt(string plainText)
     {
-        using (Aes aesAlg = Aes.Create())
+        try
         {
-            aesAlg.Key = _key; //set the key
-            aesAlg.IV = _iv; //set the vector
-            aesAlg.Mode = CipherMode.CBC; //mode, Cipher Block Chaining- prevents patterns
-            aesAlg.Padding = PaddingMode.PKCS7;//padding, standard padding scheme, ensures block size martching
-
-            //encryptor object
-            ICryptoTransform encryptor = aesAlg.CreateEncryptor();
-
-          //encrypyed data in memory, encryptor needs a stream
-            using (MemoryStream msEncrypt = new MemoryStream())
-            //encryption -> transformation done
-            using (CryptoStream csEncrypt =
-                new CryptoStream(msEncrypt, encryptor, CryptoStreamMode.Write)) //Encrypts data as it is written.
-            //plain text -> encrypted stream
-            using (StreamWriter swEncrypt = new StreamWriter(csEncrypt))
+            using (Aes aesAlg = Aes.Create())
             {
-                swEncrypt.Write(plainText);
-                swEncrypt.Close();
-                return Convert.ToBase64String(msEncrypt.ToArray()); //conversion from bytes[] to Base64 string
+                aesAlg.Key = _key; //set the key
+                aesAlg.IV = _iv; //set the vector
+                aesAlg.Mode = CipherMode.CBC; //mode, Cipher Block Chaining- prevents patterns
+                aesAlg.Padding = PaddingMode.PKCS7;//padding, standard padding scheme, ensures block size martching
 
-            }
-        }//using
+                //encryptor object
+                ICryptoTransform encryptor = aesAlg.CreateEncryptor();
+
+                //encrypyed data in memory, encryptor needs a stream
+                using (MemoryStream msEncrypt = new MemoryStream())
+                //encryption -> transformation done
+                using (CryptoStream csEncrypt =
+                    new CryptoStream(msEncrypt, encryptor, CryptoStreamMode.Write)) //Encrypts data as it is written.
+                                                                                    //plain text -> encrypted stream
+                using (StreamWriter swEncrypt = new StreamWriter(csEncrypt))
+                {
+                    swEncrypt.Write(plainText);
+                    swEncrypt.Close();
+                    return Convert.ToBase64String(msEncrypt.ToArray()); //conversion from bytes[] to Base64 string
+
+                }
+            }//using
+        }
+        catch (FormatException)
+        {
+            return "Invalid Base64 input.";
+        }
+        catch (CryptographicException)
+        {
+            return "Decryption failed. Possibly due to incorrect key/IV or corrupted input.";
+        }
+        catch (Exception ex)
+        {
+            return $"Unexpected error: {ex.Message}";
+        }
+
+
+
+
     }//method
 
 
@@ -81,27 +100,44 @@ public class AESHelper
     /// <returns>plain string</returns>
     public string Decrypt(string cipherText)
     {
-        byte[] cipherBytes = Convert.FromBase64String(cipherText);
-
-        using (Aes aesAlg = Aes.Create())
+        try
         {
-            aesAlg.Key = _key;
-            aesAlg.IV = _iv;
-            aesAlg.Mode = CipherMode.CBC; //mode
-            aesAlg.Padding = PaddingMode.PKCS7;
-            //decryptor object
-            ICryptoTransform decryptor = aesAlg.CreateDecryptor();
-            //holding bytes in the memory -> decryptor needs a stream
-            using (MemoryStream msDecrypt = new MemoryStream(cipherBytes))
-            //decryption -> transformation done
-            using (CryptoStream csDecrypt =
-                     new CryptoStream(msDecrypt, decryptor, CryptoStreamMode.Read))
-            //ciphered text -> decrypted text (plain text)
-            using (StreamReader srDecrypt = new StreamReader(csDecrypt))
+            byte[] cipherBytes = Convert.FromBase64String(cipherText);
+
+            using (Aes aesAlg = Aes.Create())
             {
-                return srDecrypt.ReadToEnd();
-            }
-        }//using
+                aesAlg.Key = _key;
+                aesAlg.IV = _iv;
+                aesAlg.Mode = CipherMode.CBC; //mode
+                aesAlg.Padding = PaddingMode.PKCS7;
+                //decryptor object
+                ICryptoTransform decryptor = aesAlg.CreateDecryptor();
+                //holding bytes in the memory -> decryptor needs a stream
+                using (MemoryStream msDecrypt = new MemoryStream(cipherBytes))
+                //decryption -> transformation done
+                using (CryptoStream csDecrypt =
+                         new CryptoStream(msDecrypt, decryptor, CryptoStreamMode.Read))
+                //ciphered text -> decrypted text (plain text)
+                using (StreamReader srDecrypt = new StreamReader(csDecrypt))
+                {
+                    return srDecrypt.ReadToEnd();
+                }
+            }//using
+
+
+        }
+        catch (FormatException)
+        {
+            return "Invalid Base64 input.";
+        }
+        catch (CryptographicException)
+        {
+            return "Decryption failed. Probably because of incorrect key/IV or corrupted input.";
+        }
+        catch (Exception ex)
+        {
+            return $"Unexpected error: {ex.Message}";
+        }
     }//method
 }//class
 

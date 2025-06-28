@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("AES_imp")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+cbbd030ad7a4409a6033e3d95e6ccdbafbb58434")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+093655324cfbf24f8a11a68ad446607c66b94279")]
 [assembly: System.Reflection.AssemblyProductAttribute("AES_imp")]
 [assembly: System.Reflection.AssemblyTitleAttribute("AES_imp")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
